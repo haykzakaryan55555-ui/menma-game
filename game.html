@@ -3,486 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TMNT 2003 - Game HUD</title>
+    <title>Menma Game - HUD</title>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            background-color: #ffffff; 
+            padding: 20px;
+            background-color: #1a1a1a;
             font-family: 'Arial Black', Gadget, sans-serif;
             user-select: none;
-            overflow: hidden;
         }
 
-        .game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            box-sizing: border-box;
-        }
-
-        /* --- ՎԵՐԵՎԻ HUD --- */
-        .top-hud {
+        /* Գլխավոր HUD կոնտեյներ */
+        .hud-container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 10px 30px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .player-panel {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            width: 40%;
-        }
-
-        .player-panel.p2 {
-            flex-direction: row-reverse;
-        }
-
-        /* Նկարների շրջանակներ */
-        .avatar-frame {
-            width: 80px;
-            height: 80px;
-            background: #20013b;
-            border: 3px solid #bd00ff;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 10px rgba(189, 0, 255, 0.8);
-            overflow: hidden; /* Որ նկարը չդուրս գա շրջանակից */
+            align-items: flex-start;
+            max-width: 1300px;
+            margin: 0 auto;
             position: relative;
         }
 
-        .p2 .avatar-frame {
-            border-color: #ff5858;
-            box-shadow: 0 0 10px rgba(255, 88, 88, 0.8);
-        }
-
-        /* Բուն նկարները */
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background-color: #111; /* Ֆոն, եթե նկարը չկա */
-        }
-
-        .status-area {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .p2 .status-area {
-            align-items: flex-end;
-        }
-
-        .score-text {
-            color: #0072ff;
-            font-size: 18px;
-            letter-spacing: 2px;
-            text-shadow: 1px 1px 0px #000;
-            margin: 0;
-        }
-
-        .p2 .score-text {
-            color: #ff5858;
-        }
-
-        /* Lifebar Կոնտեյներ - P1 (Թեքված ՁԱԽ) */
-        .bar-container {
-            width: 100%;
-            height: 25px;
-            background: #20013b;
-            border: 2px solid #bd00ff;
-            transform: skewX(-20deg);
-            overflow: hidden;
-            box-shadow: 0 0 8px #bd00ff;
-        }
-
-        /* Lifebar Կոնտեյներ - P2 (ԻՆՎԵՐՍԻԱ՝ Թեքված ԱՋ) */
-        .p2 .bar-container {
-            transform: skewX(20deg);
-            border-color: #ff5858;
-            box-shadow: 0 0 8px #ff5858;
-        }
-
-        /* P1 Կյանք (Քաշվում է ՁԱԽ) */
-        .life-fill-p1 {
-            height: 100%;
-            background: linear-gradient(90deg, #00ffcc, #0099ff);
-            width: 100%;
-            transition: width 0.3s ease-in-out;
-            float: left; /* Ամրանում է ձախից, նվազում է դեպի ձախ */
-        }
-
-        /* P2 Կյանք (Քաշվում է ԱՋ) */
-        .life-fill-p2 {
-            height: 100%;
-            background: linear-gradient(-90deg, #ffcc00, #ff0055);
-            width: 100%;
-            transition: width 0.3s ease-in-out;
-            float: right; /* Ամրանում է աջից, նվազում է դեպի աջ */
-        }
-
-        /* Կենտրոնական Սրտիկ */
-        .lives-panel {
+        /* Խաղացողների ընդհանուր ստիլը */
+        .player-block {
+            width: 420px;
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 80px;
-            height: 60px;
         }
 
-        .heart-element {
-            width: 50px;
-            height: 50px;
-            background-color: #d30000;
+        /* Շեղված կապույտ/կարմիր դիզայն հիմքը */
+        .hud-main {
+            height: 65px;
+            transform: skewX(-15deg);
+            border: 4px solid #20013b;
             position: relative;
-            transform: rotate(-45deg);
-            box-shadow: 0 0 15px rgba(211, 0, 0, 0.6);
-            border: 2px solid #fff;
+            box-shadow: 0 5px 0px #000;
         }
 
-        .heart-element::before, .heart-element::after {
-            content: "";
-            width: 50px;
-            height: 50px;
-            background-color: #d30000;
-            border-radius: 50%;
+        .p1 .hud-main { background: linear-gradient(to right, #0055ff, #002288); }
+        .p2 .hud-main { background: linear-gradient(to left, #ff2222, #880000); }
+
+        /* Անունների դիրքը (ներսում, թեքությունը ուղղած) */
+        .player-name {
             position: absolute;
-        }
-
-        .heart-element::before { top: -25px; left: 0; }
-        .heart-element::after { top: 0; right: -25px; }
-
-        .lives-count {
-            position: absolute;
+            top: 5px;
             color: white;
             font-size: 22px;
             font-weight: bold;
-            z-index: 2;
-            text-shadow: 2px 2px 4px #000;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #000;
+            transform: skewX(15deg);
+        }
+        .p1 .player-name { left: 90px; }
+        .p2 .player-name { right: 90px; }
+
+        /* Կյանքի սանդղակ (HP Bar) */
+        .hp-bar-bg {
+            position: absolute;
+            bottom: 8px;
+            width: 280px;
+            height: 16px;
+            background-color: #444;
+            border: 2px solid #000;
+            transform: skewX(15deg);
+            overflow: hidden;
+        }
+        .p1 .hp-bar-bg { left: 90px; }
+        .p2 .hp-bar-bg { right: 90px; }
+
+        .hp-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to bottom, #ffea00, #ffaa00);
+            transition: width 0.3s ease;
         }
 
-        /* Возродиться */
-        .respawn-btn {
-            background: linear-gradient(135deg, #ff0055, #990033);
-            color: white;
-            border: 2px solid white;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 14px;
+        /* Ավատարի շրջանակը */
+        .avatar-frame {
+            position: absolute;
+            top: -5px;
+            width: 75px;
+            height: 75px;
+            background-color: #f0f0f0;
+            border: 4px solid #20013b;
             transform: skewX(-15deg);
-            box-shadow: 0 0 10px red;
+            box-shadow: 3px 5px 0px #000;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .p1 .avatar-frame { left: 0; }
+        .p2 .avatar-frame { right: 0; }
+
+        .avatar-img {
+            width: 130%;
+            height: 130%;
+            margin-left: -15%;
+            margin-top: -15%;
+            transform: skewX(15deg);
+            object-fit: cover;
+        }
+        /* Ինվերսիա միայն աջ կողմի (Player 2) նկարի համար */
+        .p2 .avatar-img {
+            transform: skewX(15deg) scaleX(-1);
         }
 
-        .p2 .respawn-btn {
-            transform: skewX(15deg); /* Ինվերսիա */
+        /* Ընդհանուր սրտիկներ (Կենտրոնում) */
+        .global-lives {
+            text-align: center;
+            background: #fff;
+            border: 4px solid #20013b;
+            padding: 10px 20px;
+            transform: skewX(-15deg);
+            box-shadow: 0 5px 0px #000;
         }
-
-        .respawn-dropdown {
-            padding: 8px;
-            font-family: inherit;
-            font-size: 14px;
+        .global-lives-content {
+            transform: skewX(15deg);
+            font-size: 18px;
+            color: #20013b;
+        }
+        .hearts-container {
+            font-size: 24px;
+            color: #ff2222;
             margin-top: 5px;
         }
 
-        /* --- ՆԵՐՔԵՎԻ HUD --- */
-        .bottom-hud {
-            position: absolute;
-            bottom: 30px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 0 40px;
-            box-sizing: border-box;
-        }
-
         /* Զոմբիների հաշվիչ */
-        .enemy-counter-box {
-            background: linear-gradient(135deg, #1a0033, #4d0099);
-            border: 3px solid #00ffff;
-            padding: 10px 20px;
-            color: #00ffff;
-            font-size: 18px;
-            box-shadow: 0 0 15px #00ffff;
-            transform: skewX(-15deg);
-            margin-left: auto; 
-            transition: opacity 0.3s;
+        .zombie-counter {
+            margin-top: 15px;
+            background: #000;
+            color: #00ffcc;
+            border: 2px solid #00ffcc;
+            padding: 5px 15px;
+            font-size: 16px;
+            text-align: center;
+            box-shadow: 0 0 10px #00ffcc;
         }
 
-        /* Բոսսի HUD Container */
-        .boss-hud-wrapper {
-            width: 70%;
-            margin: 0 auto;
-            display: none; /* Սկզբից թաքնված */
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .boss-avatar-frame {
-            width: 60px;
-            height: 60px;
-            border: 3px solid #ff0000;
-            border-radius: 50%;
-            box-shadow: 0 0 15px red;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-
-        .boss-info {
-            flex-grow: 1;
-            display: flex;
+        /* ԲՈՍՍԻ HUD */
+        .boss-container {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 700px;
+            display: none; /* Ավտոմատ փակ է, կբացվի ադմինից */
             flex-direction: column;
-            gap: 5px;
+            align-items: flex-end;
         }
-
-        .boss-title {
-            color: #ff0000;
+        .boss-name {
+            color: #fff;
             font-size: 20px;
-            letter-spacing: 3px;
-            text-shadow: 2px 2px 0px black;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px #000;
             text-transform: uppercase;
+            letter-spacing: 2px;
+            align-self: flex-start;
+            padding-left: 20px;
         }
-
-        /* Բոսսի Lifebar (ԻՆՎԵՐՍԻԱ՝ Թեքված ԱՋ) */
-        .boss-bar-outer {
+        .boss-hp-bg {
             width: 100%;
             height: 20px;
-            background: #2a0000;
-            border: 2px solid #ff0000;
-            box-shadow: 0 0 10px #ff0000;
-            transform: skewX(20deg);
+            background-color: #333;
+            border: 4px solid #20013b;
+            transform: skewX(-20deg);
+            box-shadow: 0 4px 0px #000;
             overflow: hidden;
         }
-
-        /* Բոսսի Կյանք (Քաշվում է ԱՋ) */
-        .boss-bar-fill {
+        .boss-hp-fill {
             height: 100%;
-            background: linear-gradient(-90deg, #ff3300, #ff0055);
             width: 100%;
-            float: right; /* Ամրանում է աջից, նվազում է դեպի աջ */
+            background: linear-gradient(to bottom, #bd00ff, #73009c);
             transition: width 0.2s ease;
-        }
-
-        /* Պարտության Էկրան */
-        .game-over-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 100;
-        }
-
-        .game-over-text {
-            color: #ff0033;
-            font-size: 70px;
-            letter-spacing: 5px;
-            text-shadow: 0 0 20px red;
-            animation: blink 1s infinite alternate;
-        }
-
-        @keyframes blink {
-            from { opacity: 0.6; }
-            to { opacity: 1; }
+            float: right; /* Կյանքերը պակասում են աջից ձախ */
         }
     </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-<div class="game-container">
-
-    <div class="top-hud">
-        <div class="player-panel p1" id="p1-panel">
-            <div class="avatar-frame">
-                <img id="p1-img" class="avatar-img" src="https://via.placeholder.com/80/0000FF/FFFFFF?text=P1" alt="P1">
-            </div>
-            <div class="status-area" id="p1-status">
-                <p class="score-text">SCORE: 82500</p>
-                <div class="bar-container">
-                    <div class="life-fill-p1" id="p1-life"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="lives-panel">
-            <div class="heart-element"></div>
-            <div class="lives-count" id="shared-lives">5</div>
-        </div>
-
-        <div class="player-panel p2" id="p2-panel">
-            <div class="avatar-frame">
-                <img id="p2-img" class="avatar-img" src="https://via.placeholder.com/80/FFA500/FFFFFF?text=P2" alt="P2">
-            </div>
-            <div class="status-area" id="p2-status">
-                <p class="score-text">SCORE: 103890</p>
-                <div class="bar-container">
-                    <div class="life-fill-p2" id="p2-life"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bottom-hud">
+    <div class="hud-container">
         
-        <div class="boss-hud-wrapper" id="boss-hud">
-            <div class="boss-avatar-frame">
-                <img id="boss-img" class="avatar-img" src="https://via.placeholder.com/60/FF0000/FFFFFF?text=BOSS" alt="Boss">
+        <!-- PLAYER 1 (Ձախ) -->
+        <div class="player-block p1">
+            <div class="avatar-frame">
+                <img src="p1.png" alt="P1" class="avatar-img" onerror="this.src='https://via.placeholder.com/100?text=P1'">
             </div>
-            <div class="boss-info">
-                <div class="boss-title" id="boss-name">TRANCHEPIERRE</div>
-                <div class="boss-bar-outer">
-                    <div class="boss-bar-fill" id="boss-life"></div>
+            <div class="hud-main">
+                <div class="player-name">LEONARDO</div>
+                <div class="hp-bar-bg">
+                    <div class="hp-bar-fill" id="p1-hp"></div>
                 </div>
             </div>
         </div>
 
-        <div class="enemy-counter-box" id="zombie-counter-box">
-            ZOMBIES LEFT: <span id="zombie-count">15</span>
+        <!-- ԿԵՆՏՐՈՆԱԿԱՆ ՄԱՍ (Lives & Zombies) -->
+        <div style="display: flex; flex-direction: column; align-items: center; width: 250px;">
+            <div class="global-lives">
+                <div class="global-lives-content">
+                    <div>LIVES</div>
+                    <div class="hearts-container" id="hearts-box">❤❤❤❤浅</div>
+                </div>
+            </div>
+            <div class="zombie-counter">
+                ZOMBIES: <span id="zombie-count">--</span>
+            </div>
+        </div>
+
+        <!-- PLAYER 2 (Աջ) -->
+        <div class="player-block p2">
+            <div class="avatar-frame">
+                <img src="p2.png" alt="P2" class="avatar-img" onerror="this.src='https://via.placeholder.com/100?text=P2'">
+            </div>
+            <div class="hud-main">
+                <div class="player-name">RAPHAEL</div>
+                <div class="hp-bar-bg">
+                    <div class="hp-bar-fill" id="p2-hp"></div>
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <div class="game-over-screen" id="game-over">
-        <div class="game-over-text">Поражение</div>
+    <!-- ԲՈՍՍԻ ԲԱԺԻՆ -->
+    <div class="boss-container" id="boss-hud">
+        <div class="boss-name" id="boss-name-text">SHREDDER</div>
+        <div class="boss-hp-bg">
+            <div class="boss-hp-fill" id="boss-hp-bar"></div>
+        </div>
     </div>
 
-</div>
+    <script>
+        // Քո անձնական Firebase կոնֆիգուրացիան
+        const firebaseConfig = {
+            apiKey: "AIzaSyBitQi_YfwyNKSrs8XTgBjiC7QbegxVVeM",
+            authDomain: "menma-game.firebaseapp.com",
+            databaseURL: "https://menma-game-default-rtdb.firebaseio.com",
+            projectId: "menma-game",
+            storageBucket: "menma-game.firebasestorage.app",
+            messagingSenderId: "188499290563",
+            appId: "1:188499290563:web:b627805978494331e83576"
+        };
 
-<script>
-    let lives = 5;
-    let p1Hp = 100;
-    let p2Hp = 100;
-    let zombiesLeft = 15;
-    
-    let bossActive = false;
-    let bossMaxHp = 100;
-    let bossCurrentHp = 100;
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database().ref('gameState');
 
-    const customCharacters = ["Shadow Ninja", "Cyber Turtle", "Steel Shell", "Ghost Shredder"];
+        // Ռեալ ժամանակում լսում ենք ադմինի փոփոխությունները
+        db.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
 
-    // Ֆունկցիաներ, որոնք ապագայում կանչվելու են Firebase-ի կողմից
-    function updateP1Health(hp) {
-        p1Hp = Math.max(0, hp);
-        document.getElementById('p1-life').style.width = p1Hp + '%';
-        if (p1Hp === 0) showP1Respawn();
-    }
+            // 1. Թարմացնում ենք Խաղացողների HP-ն
+            document.getElementById('p1-hp').style.width = data.p1Hp + '%';
+            document.getElementById('p2-hp').style.width = data.p2Hp + '%';
 
-    function updateP2Health(hp) {
-        p2Hp = Math.max(0, hp);
-        document.getElementById('p2-life').style.width = p2Hp + '%';
-        if (p2Hp === 0) showP2Respawn();
-    }
+            // 2. Թարմացնում ենք Զոմբիների քանակը
+            document.getElementById('zombie-count').innerText = data.zombiesLeft;
 
-    function updateZombies(count) {
-        zombiesLeft = count;
-        document.getElementById('zombie-count').innerText = zombiesLeft;
-    }
+            // 3. Թարմացնում ենք Սրտիկները (Lives)
+            let heartsHtml = '';
+            for (let i = 0; i < data.lives; i++) {
+                heartsHtml += '❤';
+            }
+            document.getElementById('hearts-box').innerHTML = heartsHtml || '🔥 GAME OVER';
 
-    // --- Возродиться Համակարգ ---
-    function showP1Respawn() {
-        const statusArea = document.getElementById('p1-status');
-        statusArea.innerHTML = `<button class="respawn-btn" onclick="triggerP1Respawn()">Возродиться</button>`;
-    }
-
-    function triggerP1Respawn() {
-        if (lives > 0) {
-            lives--;
-            document.getElementById('shared-lives').innerText = lives;
-            updateP1Health(100);
-            document.getElementById('p1-status').innerHTML = `
-                <p class="score-text">SCORE: 82500</p>
-                <div class="bar-container"><div class="life-fill-p1" id="p1-life" style="width: 100%;"></div></div>
-            `;
-            checkGameOver();
-        } else { checkGameOver(); }
-    }
-
-    function showP2Respawn() {
-        const statusArea = document.getElementById('p2-status');
-        let dropdownHtml = `<select class="respawn-dropdown" id="p2-char-select" onchange="triggerP2Respawn()">
-            <option value="">Ընտրիր պերսոնաժ...</option>`;
-        customCharacters.forEach(char => {
-            dropdownHtml += `<option value="${char}">${char}</option>`;
+            // 4. Բոսսի տրամաբանությունը
+            const bossHud = document.getElementById('boss-hud');
+            if (data.boss && data.boss.active) {
+                bossHud.style.display = 'flex';
+                document.getElementById('boss-name-text').innerText = data.boss.name;
+                
+                // Հաշվում ենք տոկոսը
+                let pct = (data.boss.currentHp / data.boss.maxHp) * 100;
+                document.getElementById('boss-hp-bar').style.width = pct + '%';
+            } else {
+                bossHud.style.display = 'none';
+            }
         });
-        dropdownHtml += `</select>`;
-        
-        statusArea.innerHTML = `
-            <button class="respawn-btn" style="margin-bottom:5px;">Возродиться</button>
-            ${dropdownHtml}
-        `;
-    }
-
-    function triggerP2Respawn() {
-        const select = document.getElementById('p2-char-select');
-        const selectedChar = select.value;
-        if (!selectedChar) return;
-
-        if (lives > 0) {
-            lives--;
-            document.getElementById('shared-lives').innerText = lives;
-            updateP2Health(100);
-            
-            // Այստեղ կարող ես ըստ անվան փոխել նաև P2-ի նկարը
-            // document.getElementById('p2-img').src = "նոր_նկարի_հղումը.jpg";
-
-            document.getElementById('p2-status').innerHTML = `
-                <p class="score-text">SCORE: 103890</p>
-                <div class="bar-container"><div class="life-fill-p2" id="p2-life" style="width: 100%;"></div></div>
-            `;
-            checkGameOver();
-        } else { checkGameOver(); }
-    }
-
-    // --- Բոսսի Համակարգ ---
-    function activateBoss(maxHp, name) {
-        bossActive = true;
-        bossMaxHp = maxHp;
-        bossCurrentHp = maxHp;
-        
-        document.getElementById('zombie-counter-box').style.display = 'none';
-        document.getElementById('boss-hud').style.display = 'flex';
-        document.getElementById('boss-life').style.width = '100%';
-        document.getElementById('boss-name').innerText = name.toUpperCase();
-    }
-
-    function updateBossHealth(hp) {
-        if (!bossActive) return;
-        bossCurrentHp = Math.max(0, hp);
-        let percentage = (bossCurrentHp / bossMaxHp) * 100;
-        document.getElementById('boss-life').style.width = percentage + '%';
-
-        // ԲՈՍՍԻ ՄԱՀԸ. Կյանքը դառնում է 0 -> Բոսսը կորչում է, զոմբիները վերադառնում են
-        if (bossCurrentHp === 0) {
-            setTimeout(() => {
-                document.getElementById('boss-hud').style.display = 'none';
-                document.getElementById('zombie-counter-box').style.display = 'block';
-                bossActive = false;
-            }, 1000); // 1 վայրկյան հետո կփոխվի
-        }
-    }
-
-    function checkGameOver() {
-        if (lives === 0 && p1Hp === 0 && p2Hp === 0) {
-            document.getElementById('game-over').style.display = 'flex';
-        }
-    }
-</script>
-
+    </script>
 </body>
 </html>
