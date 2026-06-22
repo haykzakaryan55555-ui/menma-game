@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TMNT 2003 - Ադմինի Վահանակ</title>
+    <style>
+        /* Ընդհանուր մութ դիզայն */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            color: #66fcf1;
+            text-shadow: 0 0 10px #45a29e;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        /* Գրիդ համակարգ՝ քարտերը դասավորելու համար */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Առանձին քարտերի ոճավորում */
+        .card {
+            background-color: #1f2833;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border-top: 4px solid #66fcf1;
+        }
+
+        .card.p1 { border-color: #0072ff; }
+        .card.p2 { border-color: #ff5858; }
+        .card.boss { border-color: #bd00ff; }
+        .card.zombie { border-color: #00ffcc; }
+        .card.global { border-color: #ffcc00; }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 20px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #45a29e;
+            padding-bottom: 10px;
+        }
+
+        .card.p1 h2 { color: #0072ff; border-color: #0072ff; }
+        .card.p2 h2 { color: #ff5858; border-color: #ff5858; }
+        .card.boss h2 { color: #bd00ff; border-color: #bd00ff; }
+        .card.zombie h2 { color: #00ffcc; border-color: #00ffcc; }
+
+        .status-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        /* Ինփութների և կոճակների դիզայն */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #0b0c10;
+            border: 1px solid #45a29e;
+            color: #66fcf1;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            box-shadow: 0 0 8px #66fcf1;
+        }
+
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        /* Կոճակների գույները */
+        .btn-blue { background-color: #0072ff; color: white; }
+        .btn-blue:hover { background-color: #005bb5; box-shadow: 0 0 10px #0072ff;}
+
+        .btn-red { background-color: #ff5858; color: white; }
+        .btn-red:hover { background-color: #cc0000; box-shadow: 0 0 10px #ff5858;}
+
+        .btn-green { background-color: #00ffcc; color: black; }
+        .btn-green:hover { background-color: #00b38f; box-shadow: 0 0 10px #00ffcc;}
+
+        .btn-purple { background-color: #bd00ff; color: white; }
+        .btn-purple:hover { background-color: #8a00c2; box-shadow: 0 0 10px #bd00ff;}
+
+        .btn-yellow { background-color: #ffcc00; color: black; }
+        .btn-yellow:hover { background-color: #ccxa00; box-shadow: 0 0 10px #ffcc00;}
+
+    </style>
+</head>
+<body>
+
+    <h1>TMNT 2003 - Ղեկավարման Կենտրոն</h1>
+
+    <div class="admin-grid">
+
+        <!-- ԳԼԽԱՎՈՐ (Կյանքեր) -->
+        <div class="card global">
+            <h2>Ընդհանուր Կյանքեր (Lives)</h2>
+            <div class="status-text">Ներկայիս սրտիկները: <span id="admin-lives-text">5</span></div>
+            <div class="control-group">
+                <div class="input-row">
+                    <input type="number" id="set-lives-input" placeholder="Նոր քանակ">
+                    <button class="btn-yellow" onclick="setLives()">Հաստատել</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ԶՈՄԲԻՆԵՐ -->
+        <div class="card zombie">
+            <h2>Զոմբիների Քանակ</h2>
+            <div class="status-text">Մնացել է: <span id="admin-zombie-text">15</span></div>
+            <div class="control-group">
+                <div class="input-row">
+                    <input type="number" id="set-zombie-input" placeholder="Նոր քանակ">
+                    <button class="btn-green" onclick="setZombies()">Դնել</button>
+                </div>
+                <button class="btn-green" onclick="minusZombie()">-1 Զոմբի (Սպանել)</button>
+            </div>
+        </div>
+
+        <!-- PLAYER 1 -->
+        <div class="card p1">
+            <h2>Խաղացող 1 (Ձախ)</h2>
+            <div class="status-text">HP: <span id="admin-p1-hp-text">100</span>%</div>
+            <div class="control-group">
+                <label>Խփել (պակասեցնել կյանքը)</label>
+                <div class="input-row">
+                    <input type="number" id="p1-dmg-input" placeholder="Օր.՝ 15">
+                    <button class="btn-blue" onclick="damageP1()">Խփել</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Դնել հստակ կյանք (0-100)</label>
+                <div class="input-row">
+                    <input type="number" id="p1-set-input" placeholder="Օր.՝ 100">
+                    <button class="btn-blue" onclick="setP1Hp()">Դնել</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYER 2 -->
+        <div class="card p2">
+            <h2>Խաղացող 2 (Աջ)</h2>
+            <div class="status-text">HP: <span id="admin-p2-hp-text">100</span>%</div>
+            <div class="control-group">
+                <label>Խփել (պակասեցնել կյանքը)</label>
+                <div class="input-row">
+                    <input type="number" id="p2-dmg-input" placeholder="Օր.՝ 20">
+                    <button class="btn-red" onclick="damageP2()">Խփել</button>
+                </div>
+            </div>
+            <div class="control-group">
+                <label>Դնել հստակ կյանք (0-100)</label>
+                <div class="input-row">
+                    <input type="number" id="p2-set-input" placeholder="Օր.՝ 100">
+                    <button class="btn-red" onclick="setP2Hp()">Դնել</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ԲՈՍՍԻ ՎԱՀԱՆԱԿ -->
+        <div class="card boss" style="grid-column: 1 / -1;">
+            <h2>Բոսսի Կառավարում</h2>
+            <div class="status-text" id="admin-boss-status">Բոսսը անջատված է</div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Ակտիվացում -->
+                <div class="control-group" style="flex: 1; min-width: 250px;">
+                    <label>Ակտիվացնել Բոսս</label>
+                    <input type="text" id="boss-name-input" placeholder="Բոսսի անունը" style="margin-bottom:5px;">
+                    <div class="input-row">
+                        <input type="number" id="boss-maxhp-input" placeholder="Max HP (Օր.՝ 100 կամ 20)">
+                        <button class="btn-purple" onclick="activateBoss()">Ակտիվացնել</button>
+                    </div>
+                    <button class="btn-red" style="margin-top:5px;" onclick="deactivateBoss()">Անջատել Բոսսին</button>
+                </div>
+
+                <!-- Վնասել -->
+                <div class="control-group" style="flex: 1; min-width: 250px;">
+                    <label>Խփել Բոսսին (պակասեցնել HP)</label>
+                    <div class="input-row">
+                        <input type="number" id="boss-dmg-input" placeholder="Քանի՞ կյանք տանի">
+                        <button class="btn-purple" onclick="damageBoss()">Խփել</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- ՏՎՅԱԼՆԵՐԻ ԲԱԶԱ (Լոկալ պահպանում մինչ Firebase միացնելը) ---
+        let gameData = {
+            lives: 5,
+            zombiesLeft: 15,
+            p1Hp: 100,
+            p2Hp: 100,
+            boss: {
+                active: false,
+                name: "",
+                maxHp: 100,
+                currentHp: 100
+            }
+        };
+
+        // --- FIREBASE ՈՒՂԱՐԿԵԼՈՒ ՖՈՒՆԿՑԻԱ (Ապագայի համար) ---
+        function sendDataToFirebase() {
+            console.log("Ուղարկվեց Firebase:", gameData);
+            // Հետո այստեղ կլինի՝ firebase.database().ref('game').set(gameData);
+            updateAdminUI(); 
+        }
+
+        // --- UI ԹԱՐՄԱՑՈՒՄ ---
+        function updateAdminUI() {
+            document.getElementById('admin-lives-text').innerText = gameData.lives;
+            document.getElementById('admin-zombie-text').innerText = gameData.zombiesLeft;
+            document.getElementById('admin-p1-hp-text').innerText = gameData.p1Hp;
+            document.getElementById('admin-p2-hp-text').innerText = gameData.p2Hp;
+
+            const bossStatus = document.getElementById('admin-boss-status');
+            if (gameData.boss.active) {
+                bossStatus.innerHTML = `Ակտիվ է: <b>${gameData.boss.name}</b> | HP: ${gameData.boss.currentHp} / ${gameData.boss.maxHp}`;
+                bossStatus.style.color = "#bd00ff";
+            } else {
+                bossStatus.innerText = "Բոսսը անջատված է";
+                bossStatus.style.color = "#fff";
+            }
+        }
+
+        // --- ԳՈՐԾՈՂՈՒԹՅՈՒՆՆԵՐ ---
+
+        function setLives() {
+            let val = parseInt(document.getElementById('set-lives-input').value);
+            if (!isNaN(val)) {
+                gameData.lives = val;
+                sendDataToFirebase();
+            }
+        }
+
+        function setZombies() {
+            let val = parseInt(document.getElementById('set-zombie-input').value);
+            if (!isNaN(val)) {
+                gameData.zombiesLeft = val;
+                sendDataToFirebase();
+            }
+        }
+
+        function minusZombie() {
+            if (gameData.zombiesLeft > 0) {
+                gameData.zombiesLeft -= 1;
+                sendDataToFirebase();
+            }
+        }
+
+        function damageP1() {
+            let dmg = parseInt(document.getElementById('p1-dmg-input').value);
+            if (!isNaN(dmg)) {
+                gameData.p1Hp = Math.max(0, gameData.p1Hp - dmg);
+                sendDataToFirebase();
+            }
+        }
+
+        function setP1Hp() {
+            let val = parseInt(document.getElementById('p1-set-input').value);
+            if (!isNaN(val)) {
+                gameData.p1Hp = Math.min(100, Math.max(0, val));
+                sendDataToFirebase();
+            }
+        }
+
+        function damageP2() {
+            let dmg = parseInt(document.getElementById('p2-dmg-input').value);
+            if (!isNaN(dmg)) {
+                gameData.p2Hp = Math.max(0, gameData.p2Hp - dmg);
+                sendDataToFirebase();
+            }
+        }
+
+        function setP2Hp() {
+            let val = parseInt(document.getElementById('p2-set-input').value);
+            if (!isNaN(val)) {
+                gameData.p2Hp = Math.min(100, Math.max(0, val));
+                sendDataToFirebase();
+            }
+        }
+
+        function activateBoss() {
+            let name = document.getElementById('boss-name-input').value || "BOSS";
+            let maxHp = parseInt(document.getElementById('boss-maxhp-input').value) || 100;
+            
+            gameData.boss.active = true;
+            gameData.boss.name = name;
+            gameData.boss.maxHp = maxHp;
+            gameData.boss.currentHp = maxHp;
+            sendDataToFirebase();
+        }
+
+        function deactivateBoss() {
+            gameData.boss.active = false;
+            sendDataToFirebase();
+        }
+
+        function damageBoss() {
+            if (!gameData.boss.active) return alert("Բոսսը միացված չէ:");
+            let dmg = parseInt(document.getElementById('boss-dmg-input').value);
+            if (!isNaN(dmg)) {
+                gameData.boss.currentHp = Math.max(0, gameData.boss.currentHp - dmg);
+                
+                // Եթե Բոսսը մեռավ
+                if (gameData.boss.currentHp === 0) {
+                    setTimeout(() => {
+                        deactivateBoss();
+                    }, 1500); // 1.5 վայրկյանից ավտոմատ կանջատվի բազայից
+                }
+                
+                sendDataToFirebase();
+            }
+        }
+
+        // Սկզբնական թարմացում
+        updateAdminUI();
+
+    </script>
+</body>
+</html>
